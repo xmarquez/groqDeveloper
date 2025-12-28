@@ -6,10 +6,10 @@
 \alias{groqDeveloper-package}
 \title{groqDeveloper: Groq AI Provider with Structured Output and Batch Support}
 \description{
-Provides a Groq AI provider for the ellmer package with full support for structured outputs, batch processing, and parallel execution. Extends ProviderOpenAI to leverage Groq's OpenAI-compatible API with strict JSON schema validation and cost-effective batch processing.
+Provides a Groq AI provider for the ellmer package with full support for structured outputs, batch processing, and parallel execution. Extends ProviderOpenAICompatible to leverage Groq's OpenAI-compatible Chat Completions API with strict JSON schema validation for structured outputs.
 }
 \author{
-\strong{Maintainer}: First Last \email{first.last@example.com}
+\strong{Maintainer}: Xavier Marquez \email{marquez.x@gmail.com}
 
 }
 \keyword{internal}

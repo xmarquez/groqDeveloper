@@ -11,8 +11,7 @@ ProviderGroqDeveloper(
   params = list(),
   extra_args = list(),
   extra_headers = character(0),
-  credentials = function() NULL,
-  service_tier = character(0)
+  credentials = function() NULL
 )
 }
 \arguments{
@@ -29,15 +28,19 @@ ProviderGroqDeveloper(
 \item{extra_headers}{Additional HTTP headers}
 
 \item{credentials}{API credentials (function or string)}
-
-\item{service_tier}{Service tier specification}
 }
 \description{
-S7 class that extends ProviderOpenAI to provide Groq-specific functionality.
-Inherits all batch processing capabilities from ProviderOpenAI while ensuring
-proper schema formatting for Groq's strict JSON validation requirements.
+S7 class that extends ProviderOpenAICompatible to provide Groq-specific functionality.
+Inherits all capabilities from ProviderOpenAICompatible (which uses the Chat Completions
+API format) while ensuring proper schema formatting for Groq's strict JSON validation.
 }
 \details{
+This class also implements batch processing support via Groq's Batch API,
+which offers a 50\% cost discount compared to synchronous API calls.
+
 Users should typically use \code{\link[=chat_groq_developer]{chat_groq_developer()}} instead of calling this
 constructor directly. This class is exported for advanced use cases.
+}
+\seealso{
+\code{\link[=chat_groq_developer]{chat_groq_developer()}} for creating chat objects
 }

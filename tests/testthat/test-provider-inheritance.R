@@ -86,3 +86,36 @@ test_that("ProviderGroqDeveloper extends ProviderOpenAICompatible correctly", {
   # ProviderGroqDeveloper should also be a ProviderOpenAICompatible
   expect_true(S7::S7_inherits(provider_groq, ellmer_ns$ProviderOpenAICompatible))
 })
+
+test_that("ProviderGroqDeveloper has batch support", {
+  skip_if_not_installed("ellmer")
+
+  ellmer_ns <- asNamespace("ellmer")
+
+  # Create ProviderGroqDeveloper instance
+  provider <- ProviderGroqDeveloper(
+    name = "Groq",
+    base_url = "https://api.groq.com/openai/v1",
+    model = "openai/gpt-oss-20b",
+    params = ellmer_ns$params(),
+    extra_args = list(),
+    credentials = ellmer_ns$as_credentials("test", function() "test_key"),
+    extra_headers = character()
+  )
+
+  # Check that it has batch support
+  expect_true(ellmer_ns$has_batch_support(provider))
+})
+
+test_that("chat_groq_developer() provider has batch support", {
+  skip_if_not_installed("ellmer")
+
+  chat <- chat_groq_developer(credentials = function() "dummy_key_for_testing")
+
+  # Get the provider
+  provider <- chat$get_provider()
+
+  # Verify it has batch support
+  ellmer_ns <- asNamespace("ellmer")
+  expect_true(ellmer_ns$has_batch_support(provider))
+})

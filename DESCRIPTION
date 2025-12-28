@@ -18,7 +18,11 @@ Imports:
     ellmer (>= 0.0.1),
     purrr,
     lifecycle,
-    cli
+    cli,
+    httr2,
+    curl,
+    withr,
+    jsonlite
 Suggests:
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
