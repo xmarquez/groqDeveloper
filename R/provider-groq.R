@@ -59,10 +59,12 @@ groq_upload_file <- function(provider, path, purpose = "batch") {
   ellmer_ns <- asNamespace("ellmer")
   req <- ellmer_ns$base_request(provider)
   req <- httr2::req_url_path_append(req, "/files")
+
+  # Use curl::form_file with explicit filename and type
   req <- httr2::req_body_multipart(
     req,
     purpose = purpose,
-    file = curl::form_file(path)
+    file = curl::form_file(path, type = "application/jsonl", name = "batch.jsonl")
   )
 
   resp <- httr2::req_perform(req)
