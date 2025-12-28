@@ -58,7 +58,8 @@ register_groq_methods <- function() {
   TypeObject <- ellmer_ns$TypeObject
   TypeArray <- ellmer_ns$TypeArray
 
-  # Override chat_body to remove 'include' field (not supported by Groq)
+  # Override chat_body to remove fields not supported by Groq API
+  # (include, store, reasoning, service_tier)
   # Get the parent class method for ProviderOpenAI
   parent_chat_body <- S7::method(chat_body, ellmer_ns$ProviderOpenAI)
 
@@ -78,8 +79,11 @@ register_groq_methods <- function() {
       type = type
     )
 
-    # Remove 'include' field - Groq API doesn't support it
+    # Remove fields not supported by Groq API
     body$include <- NULL
+    body$store <- NULL
+    body$reasoning <- NULL
+    body$service_tier <- NULL
 
     body
   }
