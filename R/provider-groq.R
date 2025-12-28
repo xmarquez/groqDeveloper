@@ -52,10 +52,10 @@ add_additional_properties_false <- function(node) {
 #'
 #' @param provider A ProviderGroqDeveloper instance
 #' @param path Path to the file to upload
-#' @param purpose Purpose of the file (default: "batch")
+#' @param purpose Purpose of the file (default: "jsonl" for batch processing)
 #' @return The JSON response containing file metadata
 #' @noRd
-groq_upload_file <- function(provider, path, purpose = "batch") {
+groq_upload_file <- function(provider, path, purpose = "jsonl") {
   ellmer_ns <- asNamespace("ellmer")
   req <- ellmer_ns$base_request(provider)
   req <- httr2::req_url_path_append(req, "/files")
