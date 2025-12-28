@@ -4,9 +4,9 @@ test_that("ProviderGroqDeveloper class is properly defined", {
   # Check that the class exists and is an S7 class
   expect_true(inherits(ProviderGroqDeveloper, "S7_class"))
 
-  # Check that it extends ProviderOpenAI
+  # Check that it extends ProviderOpenAICompatible
   parent_class <- attr(ProviderGroqDeveloper, "parent")
-  expect_equal(attr(parent_class, "name"), "ProviderOpenAI")
+  expect_equal(attr(parent_class, "name"), "ProviderOpenAICompatible")
 })
 
 test_that("chat_groq_developer creates a valid Chat object", {

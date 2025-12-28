@@ -1,8 +1,8 @@
 #' Groq Developer Provider Class
 #'
-#' S7 class that extends ProviderOpenAI to provide Groq-specific functionality.
-#' Inherits all batch processing capabilities from ProviderOpenAI while ensuring
-#' proper schema formatting for Groq's strict JSON validation requirements.
+#' S7 class that extends ProviderOpenAICompatible to provide Groq-specific functionality.
+#' Inherits all capabilities from ProviderOpenAICompatible (which uses the Chat Completions
+#' API format) while ensuring proper schema formatting for Groq's strict JSON validation.
 #'
 #' @param name Provider name
 #' @param model Model identifier (e.g., "openai/gpt-oss-20b")
@@ -51,42 +51,15 @@ register_groq_methods <- function() {
   # Get the as_json generic from ellmer
   as_json <- S7::new_external_generic("ellmer", "as_json", "provider")
 
-  # Get the actual chat_body generic from ellmer's namespace
-  chat_body <- ellmer_ns$chat_body
-
   # Get type classes
   TypeObject <- ellmer_ns$TypeObject
   TypeArray <- ellmer_ns$TypeArray
 
-  # Override chat_body to remove fields not supported by Groq API
-  # (include, store, reasoning, service_tier)
-  # Get the parent class method for ProviderOpenAI
-  parent_chat_body <- S7::method(chat_body, ellmer_ns$ProviderOpenAI)
+  # Note: No need to override chat_body since ProviderOpenAICompatible
 
-  S7::method(chat_body, ProviderGroqDeveloper) <- function(
-    provider,
-    stream = TRUE,
-    turns = list(),
-    tools = list(),
-    type = NULL
-  ) {
-    # Call parent implementation
-    body <- parent_chat_body(
-      provider,
-      stream = stream,
-      turns = turns,
-      tools = tools,
-      type = type
-    )
-
-    # Remove fields not supported by Groq API
-    body$include <- NULL
-    body$store <- NULL
-    body$reasoning <- NULL
-    body$service_tier <- NULL
-
-    body
-  }
+  # already uses the Chat Completions API format that Groq supports.
+  # We only need to override as_json methods for TypeObject and TypeArray
+  # to add additionalProperties: false for Groq's strict JSON validation.
 
   # Register TypeObject method
   S7::method(as_json, list(ProviderGroqDeveloper, TypeObject)) <- function(provider, x, ...) {
@@ -130,15 +103,17 @@ register_groq_methods <- function() {
 # Initialize the class after ellmer is loaded
 .onLoad <- function(libname, pkgname) {
   tryCatch({
-    # Get ProviderOpenAI from ellmer
+    # Get ProviderOpenAICompatible from ellmer (NOT ProviderOpenAI)
+    # ProviderOpenAI uses the Responses API format which Groq doesn't support
+    # ProviderOpenAICompatible uses the Chat Completions API format
     ellmer_ns <- asNamespace("ellmer")
-    ProviderOpenAI <- ellmer_ns$ProviderOpenAI
+    ProviderOpenAICompatible <- ellmer_ns$ProviderOpenAICompatible
 
-    # Create ProviderGroqDeveloper class extending ProviderOpenAI
+    # Create ProviderGroqDeveloper class extending ProviderOpenAICompatible
     ProviderGroqDeveloper <<- S7::new_class(
       name = "ProviderGroqDeveloper",
       package = "groqDeveloper",
-      parent = ProviderOpenAI
+      parent = ProviderOpenAICompatible
     )
 
     # Register method overrides
@@ -153,5 +128,5 @@ register_groq_methods <- function() {
   })
 }
 
-# Batch support is inherited from ProviderOpenAI ---------------------------
-# No need to override batch methods - they work as-is with Groq's API
+# Capabilities are inherited from ProviderOpenAICompatible ------------------
+# No need to override batch/parallel methods - they work as-is with Groq's API

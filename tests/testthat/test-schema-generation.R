@@ -4,9 +4,9 @@ test_that("ProviderGroqDeveloper class structure is correct", {
   # Check that the class exists and is an S7 class
   expect_true(inherits(ProviderGroqDeveloper, "S7_class"))
 
-  # Check that it extends ProviderOpenAI
+  # Check that it extends ProviderOpenAICompatible
   parent_class <- attr(ProviderGroqDeveloper, "parent")
-  expect_equal(attr(parent_class, "name"), "ProviderOpenAI")
+  expect_equal(attr(parent_class, "name"), "ProviderOpenAICompatible")
 })
 
 test_that("Direct ProviderGroqDeveloper creation works", {
@@ -24,7 +24,8 @@ test_that("Direct ProviderGroqDeveloper creation works", {
   )
 
   expect_true(S7::S7_inherits(provider, ProviderGroqDeveloper))
-  expect_true(ellmer_ns$has_batch_support(provider))
+  # Also verify it inherits from ProviderOpenAICompatible
+  expect_true(S7::S7_inherits(provider, ellmer_ns$ProviderOpenAICompatible))
 })
 
 test_that("Schema generation adds additionalProperties: false", {
