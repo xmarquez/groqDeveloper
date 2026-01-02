@@ -12,6 +12,7 @@ Provides a Groq AI provider for the ellmer package with full support for structu
 Useful links:
 \itemize{
   \item \url{https://github.com/xmarquez/groqDeveloper}
+  \item \url{https://xmarquez.github.io/groqDeveloper/}
   \item Report bugs at \url{https://github.com/xmarquez/groqDeveloper/issues}
 }
 
