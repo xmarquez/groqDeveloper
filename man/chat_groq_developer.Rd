@@ -17,59 +17,77 @@ chat_groq_developer(
 )
 }
 \arguments{
-\item{system_prompt}{Optional system prompt to set context for the conversation}
+\item{system_prompt}{A system prompt to set the behavior of the assistant.}
 
-\item{base_url}{Base URL for Groq API. Defaults to Groq's OpenAI-compatible endpoint}
+\item{base_url}{Base URL for Groq API.}
 
-\item{api_key}{Deprecated. Use \code{credentials} instead}
+\item{api_key}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} Use \code{credentials} instead.}
 
-\item{credentials}{API credentials. Defaults to \code{GROQ_API_KEY} environment variable}
+\item{credentials}{Override the default credentials. You generally should not
+need this argument; instead set the \code{GROQ_API_KEY} environment variable.
+The best place to set this is in \code{.Renviron}, which you can easily edit by
+calling \code{usethis::edit_r_environ()}.
 
-\item{model}{Model to use. Defaults to "openai/gpt-oss-20b" which supports
-strict structured outputs. Also available: "openai/gpt-oss-120b"}
+If you do need additional control, this argument takes a zero-argument
+function that returns either a string (the API key), or a named list
+(added as additional headers to every request).}
 
-\item{params}{Optional params object for controlling generation}
+\item{model}{The model to use for the chat (defaults to "openai/gpt-oss-20b").
+We regularly update the default, so we strongly recommend explicitly
+specifying a model for anything other than casual use.
+Use \code{\link[=models_groq]{models_groq()}} to see all options.}
 
-\item{api_args}{Additional arguments passed to the API}
+\item{params}{Common model parameters, usually created by \code{\link[ellmer:params]{ellmer::params()}}.}
 
-\item{echo}{How to display output. One of "none", "text", "all"}
+\item{api_args}{Additional arguments passed to the API.}
 
-\item{api_headers}{Additional HTTP headers}
+\item{echo}{Whether to echo the conversation to the console. One of:
+\itemize{
+\item \code{"none"}: No output
+\item \code{"output"}: Echo assistant responses only
+\item \code{"all"}: Echo all messages
+Defaults to \code{"output"} in interactive sessions, \code{"none"} otherwise.
+}}
+
+\item{api_headers}{Additional HTTP headers.}
 }
 \value{
-A Chat object with methods for:
+A \link[ellmer:Chat]{ellmer::Chat} object with methods for:
 \itemize{
-\item \code{chat()}: Send messages and receive responses
-\item \code{chat_structured()}: Extract structured data with type validation
-\item Batch processing via ellmer's \code{batch_chat()} and \code{batch_chat_structured()}
-\item Parallel processing via ellmer's \code{parallel_chat()} and \code{parallel_chat_structured()}
+\item \verb{$chat()}: Send messages and receive responses
+\item \verb{$chat_structured()}: Extract structured data with type validation
+\item Batch processing via \code{\link[=batch_chat]{batch_chat()}} and \code{\link[=batch_chat_structured]{batch_chat_structured()}}
+\item Parallel processing via \code{\link[=parallel_chat]{parallel_chat()}} and \code{\link[=parallel_chat_structured]{parallel_chat_structured()}}
 }
 }
 \description{
 Creates a chat interface for Groq's API with support for structured outputs,
 batch processing, and parallel execution. This developer version extends
-ProviderOpenAI to inherit full batch support while adding Groq-specific
-schema formatting (additionalProperties: false).
+ellmer's ProviderOpenAICompatible to inherit full batch support while adding
+Groq-specific schema formatting (additionalProperties: false).
+
+Sign up at \url{https://groq.com}.
+
+Built on top of ellmer's ProviderOpenAICompatible class.
 }
 \section{Structured Outputs}{
 
 Groq supports strict JSON schema validation with guaranteed compliance when using
-compatible models. All objects must have \code{additionalProperties: false} and all
-fields must be required (or use union with null for optional fields).
+compatible models. See \url{https://console.groq.com/docs/structured-outputs} for details.
 }
 
 \section{Batch Processing}{
 
 Groq's batch API offers 50\% cost discount and no rate limit impact. Batch jobs
 are processed asynchronously with completion windows from 24 hours to 7 days.
-Use \code{batch_chat()} or \code{batch_chat_structured()} from ellmer to submit batches.
+Use \code{\link[=batch_chat]{batch_chat()}} or \code{\link[=batch_chat_structured]{batch_chat_structured()}} to submit batches.
 }
 
 \section{Models}{
 
 For strict structured output support, use:
 \itemize{
-\item \code{"openai/gpt-oss-20b"} (default, recommended)
+\item \code{"openai/gpt-oss-20b"} (default)
 \item \code{"openai/gpt-oss-120b"}
 }
 
@@ -83,23 +101,20 @@ chat <- chat_groq_developer()
 chat$chat("What is the capital of France?")
 
 # Structured output
-type_person <- type_object(
-  name = type_string(),
-  age = type_integer(),
-  city = type_string()
+type_person <- ellmer::type_object(
+  name = ellmer::type_string(),
+  age = ellmer::type_integer(),
+  city = ellmer::type_string()
 )
 result <- chat$chat_structured(
   "John is 30 years old and lives in NYC",
   type = type_person
 )
 
-# Batch processing (requires ellmer's batch functions)
-library(ellmer)
-chat <- chat_groq_developer()
+# Batch processing
 results <- batch_chat(
   chat,
-  prompts = c("Question 1?", "Question 2?", "Question 3?"),
-  wait = FALSE  # Async - check back later
+  prompts = c("Question 1?", "Question 2?", "Question 3?")
 )
 
 # Parallel processing
@@ -112,8 +127,9 @@ results <- parallel_chat(
 }
 \seealso{
 \itemize{
-\item \code{\link[ellmer:batch_chat]{ellmer::batch_chat()}} for batch processing
-\item \code{\link[ellmer:parallel_chat]{ellmer::parallel_chat()}} for parallel processing
+\item \code{\link[=batch_chat]{batch_chat()}} for batch processing
+\item \code{\link[=parallel_chat]{parallel_chat()}} for parallel processing
 \item \code{\link[ellmer:type_boolean]{ellmer::type_object()}}, \code{\link[ellmer:type_boolean]{ellmer::type_array()}} for defining types
 }
 }
+\concept{chatbots}

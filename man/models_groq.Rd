@@ -11,11 +11,12 @@ models_groq(
 )
 }
 \arguments{
-\item{base_url}{Base URL for the Groq API. Defaults to Groq's OpenAI-compatible endpoint.}
+\item{base_url}{Base URL for the Groq API.}
 
-\item{api_key}{Deprecated. Use \code{credentials} instead.}
+\item{api_key}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} Use \code{credentials} instead.}
 
-\item{credentials}{API credentials. Defaults to \code{GROQ_API_KEY} environment variable.}
+\item{credentials}{Override the default credentials. You generally should not
+need this argument; instead set the \code{GROQ_API_KEY} environment variable.}
 }
 \value{
 A data frame with columns:
