@@ -80,7 +80,8 @@ compatible models. See \url{https://console.groq.com/docs/structured-outputs} fo
 
 Groq's batch API offers 50\% cost discount and no rate limit impact. Batch jobs
 are processed asynchronously with completion windows from 24 hours to 7 days.
-Use \code{\link[=batch_chat]{batch_chat()}} or \code{\link[=batch_chat_structured]{batch_chat_structured()}} to submit batches.
+Use \code{\link[=batch_chat]{batch_chat()}} or \code{\link[=batch_chat_structured]{batch_chat_structured()}} to submit batches. See
+\url{https://console.groq.com/docs/batch} for details.
 }
 
 \section{Models}{

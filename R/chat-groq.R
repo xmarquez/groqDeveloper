@@ -47,7 +47,8 @@
 #' @section Batch Processing:
 #' Groq's batch API offers 50% cost discount and no rate limit impact. Batch jobs
 #' are processed asynchronously with completion windows from 24 hours to 7 days.
-#' Use [batch_chat()] or [batch_chat_structured()] to submit batches.
+#' Use [batch_chat()] or [batch_chat_structured()] to submit batches. See 
+#' <https://console.groq.com/docs/batch> for details.
 #'
 #' @section Models:
 #' For strict structured output support, use:

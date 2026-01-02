@@ -10,15 +10,16 @@
 This package extends the [ellmer](https://github.com/tidyverse/ellmer)
 package’s `ProviderOpenAICompatible` (Chat Completions format) while
 adding Groq-specific enhancements, in particular structured outputs,
-batch processing, and a \[models_groq\] function. It does not mask
-`ellmer`’s `chat_groq`, but creates a `Chat` object using
-`chat_groq_developer`. You will need a paid developer account to use the
-batch processing features. The package is otherwise fullly integrated
-with `ellmer`– it works with `batch_chat()`, `parallel_chat()`, etc.
+batch processing, and a `models_groq()` function. It does not mask
+`ellmer::chat_groq()`, but creates a `Chat` object using
+`chat_groq_developer()`. You will need a paid developer account to use
+the batch processing features. The package is otherwise fully integrated
+with `ellmer` – it works with `batch_chat()`, `parallel_chat()`,
+`batch_chat_structured()`, etc.
 
 ## Installation
 
-You can install the development version of groqDeveloper from GitHub:
+You can install the development version of `groqDeveloper` from GitHub:
 
     # install.packages("devtools")
     devtools::install_github("xmarquez/groqDeveloper")
@@ -30,7 +31,7 @@ key](https://console.groq.com/keys) to use this package.
 
     Sys.setenv(GROQ_API_KEY = "your-api-key-here")
 
-You can also add the key to your .Renviron file.
+You should add the key to your .Renviron file.
 
 ## Examples
 
@@ -46,13 +47,12 @@ chat$chat("What is the capital of France?")
 ### Structured output
 
 ``` r
-library(ellmer)
 
 # Define the structure
-type_person <- type_object(
-  name = type_string(),
-  age = type_integer(),
-  city = type_string()
+type_person <- ellmer::type_object(
+  name = ellmer::type_string(),
+  age = ellmer::type_integer(),
+  city = ellmer::type_string()
 )
 
 # Extract structured data
@@ -73,8 +73,6 @@ guaranteed for at least 24 hours, most requests with up to 500 prompts
 finish in seconds.
 
 ``` r
-chat <- chat_groq_developer()
-
 prompts <- list(
   "What is 2+2?",
   "What is the capital of France?",
@@ -88,16 +86,8 @@ results_file <- tempfile(fileext = ".json")
 chats <- batch_chat(
   chat,
   prompts = prompts,
-  path = results_file,
-  wait = FALSE
+  path = results_file
 )
-
-Sys.sleep(10)
-
-# Check status later
-if (batch_chat_completed(chat, prompts, path = results_file)) {
-  chats <- batch_chat(chat, prompts, path = results_file)
-}
 
 chats
 ```
@@ -105,9 +95,9 @@ chats
 ### Batch structured output
 
 ``` r
-type_answer <- type_object(
-  question = type_string(),
-  answer = type_string()
+type_answer <- ellmer::type_object(
+  question = ellmer::type_string(),
+  answer = ellmer::type_string()
 )
 
 results_file <- tempfile(fileext = ".json")
@@ -116,8 +106,7 @@ data <- batch_chat_structured(
   chat,
   prompts = list("What is 2+2?", "What is the capital of France?"),
   path = results_file,
-  type = type_answer,
-  wait = TRUE
+  type = type_answer
 )
 
 data
