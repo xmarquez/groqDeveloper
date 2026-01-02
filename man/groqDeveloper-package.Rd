@@ -8,6 +8,14 @@
 \description{
 Provides a Groq AI provider for the ellmer package with full support for structured outputs, batch processing, and parallel execution. Extends ProviderOpenAICompatible to leverage Groq's OpenAI-compatible Chat Completions API with strict JSON schema validation for structured outputs.
 }
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://github.com/xmarquez/groqDeveloper}
+  \item Report bugs at \url{https://github.com/xmarquez/groqDeveloper/issues}
+}
+
+}
 \author{
 \strong{Maintainer}: Xavier Marquez \email{marquez.x@gmail.com}
 
