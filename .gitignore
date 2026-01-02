@@ -28,3 +28,10 @@
 
 # Claude Code plans directory
 .claude/
+
+# data-raw directory
+data-raw/
+docs
+
+/.quarto/
+**/*.quarto_ipynb

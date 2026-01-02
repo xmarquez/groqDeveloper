@@ -1,34 +1,42 @@
+---
+output: github_document
+---
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%",
+  eval = FALSE
+)
+```
 
 # groqDeveloper
 
 <!-- badges: start -->
-
 <!-- badges: end -->
 
-This package extends the [ellmer](https://github.com/tidyverse/ellmer)
-package’s `ProviderOpenAICompatible` (Chat Completions format) while
-adding Groq-specific enhancements, in particular structured outputs,
-batch processing, and a \[models_groq\] function. It does not mask
-`ellmer`’s `chat_groq`, but creates a `Chat` object using
-`chat_groq_developer`. You will need a paid developer account to use the
-batch processing features. The package is otherwise fullly integrated
-with `ellmer`– it works with `batch_chat()`, `parallel_chat()`, etc.
+This package extends the  [ellmer](https://github.com/tidyverse/ellmer) package's `ProviderOpenAICompatible` (Chat Completions format) while adding Groq-specific enhancements, in particular structured outputs, batch processing, and a [models_groq] function. It does not mask `ellmer`'s `chat_groq`, but creates a `Chat` object using `chat_groq_developer`. You will need a paid developer account to use the batch processing features. The package is otherwise fullly integrated with `ellmer`-- it works with `batch_chat()`, `parallel_chat()`, etc.
 
 ## Installation
 
 You can install the development version of groqDeveloper from GitHub:
 
-    # install.packages("devtools")
-    devtools::install_github("xmarquez/groqDeveloper")
+```
+# install.packages("devtools")
+devtools::install_github("xmarquez/groqDeveloper")
+```
 
 ## Setup
 
-You will need to [set up your Groq API
-key](https://console.groq.com/keys) to use this package.
+You will need to [set up your Groq API key](https://console.groq.com/keys) to use this package.
 
-    Sys.setenv(GROQ_API_KEY = "your-api-key-here")
+```
+Sys.setenv(GROQ_API_KEY = "your-api-key-here")
+```
 
 You can also add the key to your .Renviron file.
 
@@ -36,7 +44,7 @@ You can also add the key to your .Renviron file.
 
 ### Basic chat
 
-``` r
+```{r}
 library(groqDeveloper)
 
 chat <- chat_groq_developer(model = "openai/gpt-oss-20b")
@@ -45,7 +53,7 @@ chat$chat("What is the capital of France?")
 
 ### Structured output
 
-``` r
+```{r}
 library(ellmer)
 
 # Define the structure
@@ -67,12 +75,9 @@ str(result)
 
 ### Batch processing
 
-Process multiple requests with cost savings using Groq’s batch API. The
-Groq batch API is typically blazingly fast; though completion is not
-guaranteed for at least 24 hours, most requests with up to 500 prompts
-finish in seconds.
+Process multiple requests with cost savings using Groq's batch API. The Groq batch API is typically blazingly fast; though completion is not guaranteed for at least 24 hours, most requests with up to 500 prompts finish in seconds.
 
-``` r
+```{r}
 chat <- chat_groq_developer()
 
 prompts <- list(
@@ -104,7 +109,7 @@ chats
 
 ### Batch structured output
 
-``` r
+```{r}
 type_answer <- type_object(
   question = type_string(),
   answer = type_string()
@@ -127,7 +132,7 @@ data
 
 Process multiple prompts concurrently (synchronous):
 
-``` r
+```{r}
 
 results <- parallel_chat(
   chat,
@@ -143,25 +148,21 @@ results
 
 ## Supported models
 
-For strict structured outputs, Groq supports [the following
-models](https://console.groq.com/docs/structured-outputs#supported-models)
-as of 2 January 2025:
+For strict structured outputs, Groq supports [the following models](https://console.groq.com/docs/structured-outputs#supported-models) as of 2 January 2025:
 
 # Groq Structured Outputs - Supported Models
 
-The following models support `strict: true`, which uses constrained
-decoding to guarantee schema-compliant output:
+The following models support `strict: true`, which uses constrained decoding to guarantee schema-compliant output:
 
 | Model ID | Model |
-|----|----|
+|----------|-------|
 | openai/gpt-oss-20b | [GPT-OSS 20B](https://console.groq.com/docs/model/openai/gpt-oss-20b) |
 | openai/gpt-oss-120b | [GPT-OSS 120B](https://console.groq.com/docs/model/openai/gpt-oss-120b) |
 
-The following models support Structured Outputs with `strict: false`
-(default), which attempts schema compliance but may occasionally error:
+The following models support Structured Outputs with `strict: false` (default), which attempts schema compliance but may occasionally error:
 
 | Model ID | Model |
-|----|----|
+|----------|-------|
 | openai/gpt-oss-20b | [GPT-OSS 20B](https://console.groq.com/docs/model/openai/gpt-oss-20b) |
 | openai/gpt-oss-120b | [GPT-OSS 120B](https://console.groq.com/docs/model/openai/gpt-oss-120b) |
 | openai/gpt-oss-safeguard-20b | [Safety GPT OSS 20B](https://console.groq.com/docs/model/openai/gpt-oss-safeguard-20b) |
@@ -169,24 +170,16 @@ The following models support Structured Outputs with `strict: false`
 | meta-llama/llama-4-maverick-17b-128e-instruct | [Llama 4 Maverick](https://console.groq.com/docs/model/meta-llama/llama-4-maverick-17b-128e-instruct) |
 | meta-llama/llama-4-scout-17b-16e-instruct | [Llama 4 Scout](https://console.groq.com/docs/model/meta-llama/llama-4-scout-17b-16e-instruct) |
 
-Other models offered by Groq can use [JSON object
-mode](https://console.groq.com/docs/structured-outputs#json-object-mode)
-to generate valid JSON, but without any schema compliance. You can use
-JSON object mode by passing the param `response_format` and setting it
-to `list("type" = "json_object")`, then decoding the text response
-yourself using \[jsonlite::from_json\]
+Other models offered by Groq can use [JSON object mode](https://console.groq.com/docs/structured-outputs#json-object-mode) to generate valid JSON, but without any schema compliance. You can use JSON object mode by passing the param `response_format` and setting it to `list("type" = "json_object")`, then decoding the text response yourself using [jsonlite::from_json]
 
-Streaming and tool use are not currently supported with Structured
-Outputs on Groq.
+Streaming and tool use are not currently supported with Structured Outputs on Groq.
 
 ## Batch processing - Supported Models
 
-For batch processing, [Groq supports the following
-models](https://console.groq.com/docs/batch#model-availability-and-pricing)
-as of 2 January 2025:
+For batch processing, [Groq supports the following models](https://console.groq.com/docs/batch#model-availability-and-pricing) as of 2 January 2025:
 
 | Model ID | Model |
-|----|----|
+|----------|-------|
 | openai/gpt-oss-20b | [GPT-OSS 20B](https://console.groq.com/docs/model/openai/gpt-oss-20b) |
 | openai/gpt-oss-120b | [GPT-OSS 120B](https://console.groq.com/docs/model/openai/gpt-oss-120b) |
 | meta-llama/llama-4-maverick-17b-128e-instruct | [Llama 4 Maverick](https://console.groq.com/docs/model/meta-llama/llama-4-maverick-17b-128e-instruct) |
@@ -195,17 +188,10 @@ as of 2 January 2025:
 | llama-3.1-8b-instant | [Llama 3.1 8B Instant](https://console.groq.com/docs/model/llama-3.1-8b-instant) |
 | meta-llama/llama-guard-4-12b | [Llama Guard 4 12B](https://console.groq.com/docs/model/meta-llama/llama-guard-4-12b) |
 
-Pricing is at a 50% cost discount compared to [synchronous API
-pricing](https://groq.com/pricing). But the batch discount does not
-stack with [prompt
-caching](https://console.groq.com/docs/prompt-caching) discounts. All
-batch tokens are billed at the 50% batch rate regardless of cache
-status.
+Pricing is at a 50% cost discount compared to [synchronous API pricing](https://groq.com/pricing). But the batch discount does not stack with [prompt caching](https://console.groq.com/docs/prompt-caching) discounts. All batch tokens are billed at the 50% batch rate regardless of cache status.
 
-This package was mostly coded by Claude Code (Opus 4.5), though
-everything was reviewed by me (Xavier Marquez), including all live
-tests. I’ve used it with workloads of thousands of prompts at a time.
-
+This package was mostly coded by Claude Code (Opus 4.5), though everything was reviewed by me (Xavier Marquez), including all live tests. I've used it with workloads of thousands of prompts at a time.
+ 
 ## License
 
 MIT
