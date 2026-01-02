@@ -2,6 +2,7 @@
 
 export(ProviderGroqDeveloper)
 export(chat_groq_developer)
+export(models_groq)
 if (getRversion() < "4.3.0") importFrom("S7", "@")
 import(S7)
 importFrom(ellmer,chat_openai)

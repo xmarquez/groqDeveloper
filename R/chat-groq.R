@@ -152,3 +152,97 @@ chat_groq_developer <- function(
 
 # Helper operator
 `%||%` <- function(x, y) if (is.null(x)) y else x
+
+#' List Available Groq Models
+#'
+#' Retrieves a list of available models from the Groq API. Returns model
+#' metadata including context window size and active status.
+#'
+#' @param base_url Base URL for the Groq API. Defaults to Groq's OpenAI-compatible endpoint.
+#' @param api_key Deprecated. Use `credentials` instead.
+#' @param credentials API credentials. Defaults to `GROQ_API_KEY` environment variable.
+#'
+#' @return A data frame with columns:
+#'   \describe{
+#'     \item{id}{Model identifier (e.g., "llama-3.3-70b-versatile")}
+#'     \item{created_at}{Date the model was created}
+#'     \item{owned_by}{Organization that owns/provides the model}
+#'     \item{context_window}{Maximum context window size in tokens}
+#'     \item{active}{Whether the model is currently active/available}
+#'   }
+#'
+#' @examples
+#' \dontrun{
+#' # List all available models
+#' models <- models_groq()
+#' print(models)
+#'
+#' # Filter for active models with large context windows
+#' large_context <- models[models$context_window >= 32768 & models$active, ]
+#' }
+#'
+#' @seealso [chat_groq_developer()] for creating chat sessions
+#'
+#' @export
+models_groq <- function(
+  base_url = "https://api.groq.com/openai/v1",
+  api_key = NULL,
+
+  credentials = NULL
+) {
+  ellmer_ns <- asNamespace("ellmer")
+
+  # Handle credentials
+  if (!is.null(api_key)) {
+    lifecycle::deprecate_warn(
+      "0.1.0",
+      "models_groq(api_key)",
+      "models_groq(credentials)"
+    )
+    credentials <- api_key
+  }
+
+  credentials <- ellmer_ns$as_credentials(
+    "models_groq",
+    function() Sys.getenv("GROQ_API_KEY"),
+    credentials = credentials
+  )
+
+  # Create a minimal provider for making the request
+  provider <- ellmer_ns$ProviderOpenAICompatible(
+    name = "Groq",
+    model = "",
+    base_url = base_url,
+    credentials = credentials
+  )
+
+  # Make the API request
+
+  req <- ellmer_ns$base_request(provider)
+  req <- httr2::req_url_path_append(req, "/models")
+  resp <- httr2::req_perform(req)
+  json <- httr2::resp_body_json(resp)
+
+  # Extract model data
+  # Groq returns: id, object, created, owned_by, active, context_window
+
+  id <- vapply(json$data, function(x) x$id %||% "", character(1))
+  created <- as.Date(.POSIXct(vapply(json$data, function(x) x$created %||% 0L, integer(1))))
+  owned_by <- vapply(json$data, function(x) x$owned_by %||% "", character(1))
+  context_window <- vapply(json$data, function(x) x$context_window %||% NA_integer_, integer(1))
+  active <- vapply(json$data, function(x) x$active %||% TRUE, logical(1))
+
+  # Build data frame
+
+  df <- data.frame(
+    id = id,
+    created_at = created,
+    owned_by = owned_by,
+    context_window = context_window,
+    active = active,
+    stringsAsFactors = FALSE
+  )
+
+  # Sort by creation date (newest first)
+  df[order(-xtfrm(df$created_at)), ]
+}

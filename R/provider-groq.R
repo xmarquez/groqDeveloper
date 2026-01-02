@@ -96,15 +96,27 @@ to_json <- function(x) {
   jsonlite::toJSON(x, auto_unbox = TRUE)
 }
 
-#' Read newline-delimited JSON file
+#' Default fallback for Groq NDJSON parsing errors
 #'
-#' @param path Path to NDJSON file
-#' @return List of parsed JSON objects
+#' Extracts custom_id from failed line and returns a 500 error response.
+#' @param line The failed JSON line
+#' @return A list with custom_id and error response
 #' @noRd
-read_ndjson <- function(path) {
-  lines <- readLines(path, warn = FALSE)
-  lines <- lines[nzchar(trimws(lines))]
-  lapply(lines, jsonlite::fromJSON, simplifyVector = FALSE)
+groq_json_fallback <- function(line) {
+  # Try to extract custom_id from the line
+  custom_id <- tryCatch({
+    m <- regmatches(line, regexpr('"custom_id"\\s*:\\s*"([^"]+)"', line, perl = TRUE))
+    if (length(m) > 0) {
+      gsub('^"custom_id"\\s*:\\s*"([^"]+)".*', "\\1", m, perl = TRUE)
+    } else {
+      "unknown"
+    }
+  }, error = function(e) "unknown")
+
+  list(
+    custom_id = custom_id,
+    response = list(status_code = 500, body = NULL)
+  )
 }
 
 # Method registration -----------------------------------------------------
@@ -189,31 +201,77 @@ register_groq_methods <- function() {
   }
 
   # Register batch_status method
+  # Groq batch status values: validating, in_progress, finalizing, completed,
+  # failed, expired, cancelling, cancelled
+  # We consider anything other than these terminal states as "working"
   S7::method(batch_status, ProviderGroqDeveloper) <- function(provider, batch) {
+    # Terminal states where we're no longer working
+    terminal_states <- c("completed", "failed", "expired", "cancelled")
+    is_working <- !(batch$status %in% terminal_states)
+
+    # Safely extract request counts with defaults
+    request_counts <- batch$request_counts
+    total <- request_counts$total %||% 0
+    completed <- request_counts$completed %||% 0
+    failed <- request_counts$failed %||% 0
+
     list(
-      working = batch$status != "completed",
-      n_processing = batch$request_counts$total - batch$request_counts$completed,
-      n_succeeded = batch$request_counts$completed,
-      n_failed = batch$request_counts$failed
+      working = is_working,
+      n_processing = total - completed - failed,
+      n_succeeded = completed,
+      n_failed = failed
     )
   }
 
   # Register batch_retrieve method
+  # Matches ellmer's ProviderOpenAI implementation for consistency
   S7::method(batch_retrieve, ProviderGroqDeveloper) <- function(provider, batch) {
-    path_output <- withr::local_tempfile()
+    # Download output file
+    path_output <- tempfile(fileext = ".jsonl")
+    on.exit(unlink(path_output), add = TRUE)
     groq_download_file(provider, batch$output_file_id, path_output)
 
-    json <- read_ndjson(path_output)
+    # Read file and filter empty lines
+    lines <- readLines(path_output, warn = FALSE)
+    lines <- lines[nzchar(trimws(lines))]
+
+    # Parse each line
+    json <- lapply(lines, function(line) {
+      tryCatch(
+        jsonlite::fromJSON(line, simplifyVector = FALSE),
+        error = function(e) groq_json_fallback(line)
+      )
+    })
 
     # Also get error file if it exists
-    if (length(batch$error_file_id) == 1 && !is.null(batch$error_file_id)) {
-      path_error <- withr::local_tempfile()
+    if (length(batch$error_file_id) == 1 && !is.null(batch$error_file_id) &&
+        !identical(batch$error_file_id, list())) {
+      path_error <- tempfile(fileext = ".jsonl")
+      on.exit(unlink(path_error), add = TRUE)
       groq_download_file(provider, batch$error_file_id, path_error)
-      json <- c(json, read_ndjson(path_error))
+
+      error_lines <- readLines(path_error, warn = FALSE)
+      error_lines <- error_lines[nzchar(trimws(error_lines))]
+      error_json <- lapply(error_lines, function(line) {
+        tryCatch(
+          jsonlite::fromJSON(line, simplifyVector = FALSE),
+          error = function(e) groq_json_fallback(line)
+        )
+      })
+      json <- c(json, error_json)
     }
 
-    # Sort by custom_id to restore original order
-    ids <- as.numeric(gsub("chat-", "", purrr::map_chr(json, "custom_id")))
+    # Filter out NULL entries
+    json <- purrr::compact(json)
+
+    if (length(json) == 0) {
+      cli::cli_abort("No results found in batch output file")
+    }
+
+    # Extract and sort results by custom_id to restore original order
+    # Use vapply for safer extraction (purrr::map_chr with "[["" can have issues)
+    custom_ids <- vapply(json, function(x) x$custom_id, character(1))
+    ids <- as.numeric(gsub("chat-", "", custom_ids))
     results <- lapply(json, function(x) x$response)
     results[order(ids)]
   }
