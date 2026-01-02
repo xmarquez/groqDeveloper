@@ -226,7 +226,7 @@
 </tr>
 </tbody>
 </table>
-<p>Other models offered by Groq can use <a href="https://console.groq.com/docs/structured-outputs#json-object-mode" class="external-link">JSON object mode</a> to generate valid JSON, but without any schema compliance. You can use JSON object mode by passing the param <code>response_format</code> and setting it to <code>list("type" = "json_object")</code>, then decoding the text response yourself using [jsonlite::from_json]</p>
+<p>Other models offered by Groq can use <a href="https://console.groq.com/docs/structured-outputs#json-object-mode" class="external-link">JSON object mode</a> to generate valid JSON, but without any schema compliance. You can use JSON object mode by passing the param <code>response_format</code> and setting it to <code>list("type" = "json_object")</code>, then decoding the text response yourself using <code>jsonlite::from_json()</code></p>
 <p>Streaming and tool use are not currently supported with Structured Outputs on Groq.</p>
 <div class="section level2">
 <h2 id="batch-processing---supported-models">Batch processing - Supported Models<a class="anchor" aria-label="anchor" href="#batch-processing---supported-models"></a>
