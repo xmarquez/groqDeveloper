@@ -163,7 +163,7 @@ mode](https://console.groq.com/docs/structured-outputs#json-object-mode)
 to generate valid JSON, but without any schema compliance. You can use
 JSON object mode by passing the param `response_format` and setting it
 to `list("type" = "json_object")`, then decoding the text response
-yourself using \[jsonlite::from_json\]
+yourself using `jsonlite::from_json()`
 
 Streaming and tool use are not currently supported with Structured
 Outputs on Groq.
